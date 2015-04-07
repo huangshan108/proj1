@@ -8,14 +8,46 @@
 		<th>Name</th>
 		<th>Level</th>
 		<th>Health</th>
-		<th>Damage!</th>
+		<th>Experience</th>
+		<th>
+			Damage using
+			<select>
+				<% current_trainer.pokemons.where("id > ?", 0).each do |my_pokemon| %>
+			  	<option value="<%= my_pokemon.id %>"><%= my_pokemon.name %></option>
+			  <% end %>
+			</select>
+		</th>
+		<th>Heal!</th>
 	</tr>
 	<% @trainer.pokemons.each do |pokemon| %>
+		<% if (current_trainer.id.to_s != params[:id]) and pokemon.health == 0 %>
+			<% next %>
+		<% end %>
 	<tr>
 		<td><%= pokemon.name %></td>
 		<td><%= pokemon.level %></td>
 		<td><%= pokemon.health %></td>
-		<td><%= link_to 'Damage!', damage_path(:pokemon_id => pokemon), :method => :patch %></td>
+		<td><%= pokemon.experience %></td>
+		<td>
+		<% if(current_trainer.id.to_s != params[:id]) %>
+			<%= link_to 'Damage!', damage_heal_path(:pokemon_id => pokemon, :option => 'damage'), :method => :patch, style: "color: #D8000C;", :name => :damage %>
+		<% end %>
+		</td>
+		<td>
+		<% if(current_trainer.id.to_s == params[:id]) %>
+			<%= link_to 'Heal!', damage_heal_path(:pokemon_id => pokemon, :option => 'heal'), :method => :patch, style: "color: #4F8A10;" %>
+		<% end %>
+		</td>
 	</tr>
 <% end %>
 </ul>
+<script type="text/javascript">
+	$(document).ready(function (){
+		$('a[name="damage"]').click(function (e){
+			e.preventDefault();
+			var href = $(this).attr("href");
+			href += "&my_pokemon=" + $('select').val();
+			$(this).attr("href", href);
+		})
+	});
+</script>
